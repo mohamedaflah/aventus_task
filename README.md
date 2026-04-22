@@ -104,64 +104,106 @@ Server runs at: `http://localhost:4001`
 
 ---
 
-## 🔍 Search API
+## 📡 API Reference
 
-### Endpoint
+### Base URL
 
 ```
-GET /api/search
+http://localhost:4001
 ```
 
-### Query Parameters
+---
 
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `q` | string | No | Search term (omit to return all products) |
-| `page` | number | Yes | Page number |
-| `limit` | number | Yes | Items per page |
-| `sort` | string | No | Sort order (see below) |
+### `GET /api/search`
 
-### Sort Options
+Search and retrieve products with full-text ranking, pagination, and optional sorting.
+
+#### Query Parameters
+
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `q` | `string` | No | — | Search keyword. Omit to return all products. |
+| `page` | `number` | Yes | — | Page number (1-based) |
+| `limit` | `number` | Yes | — | Number of results per page |
+| `sort` | `string` | No | relevance | Sort order (see options below) |
+
+#### Sort Values
 
 | Value | Description |
 |---|---|
-| `price_asc` | Price: low to high |
-| `price_desc` | Price: high to low |
-| `title_asc` | Title: A to Z |
+| `price_asc` | Price: low → high |
+| `price_desc` | Price: high → low |
+| `title_asc` | Title: A → Z |
 
-### Example Requests
+#### Request Examples
 
 ```bash
-# Search by query
+# Full-text search
 GET /api/search?q=apple&page=1&limit=10
 
-# Get all products (paginated)
+# Browse all products (no search term)
 GET /api/search?page=1&limit=10
 
-# Search with sorting
-GET /api/search?q=apple&sort=price_asc
-GET /api/search?sort=price_desc
-GET /api/search?sort=title_asc
+# Search + sort by price ascending
+GET /api/search?q=apple&page=1&limit=10&sort=price_asc
+
+# Browse all, sort by price descending
+GET /api/search?page=1&limit=10&sort=price_desc
+
+# Search + sort by title
+GET /api/search?q=apple&page=1&limit=10&sort=title_asc
 ```
 
-### Example Response
+#### Response
+
+**`200 OK`**
 
 ```json
 {
   "data": [
     {
-      "id": 1,
-      "title": "Apple Mobile Model 1",
+      "id": 117,
+      "title": "Apple Headphones Model 117",
       "brand": "Apple",
-      "price": 500,
-      "snippet": "...Apple Mobile...",
-      "score": 1.23
+      "price": "1072",
+      "snippet": "This is a <b>Apple</b> Headphones with great features and performance",
+      "score": 1.4822293996810914
+    },
+    {
+      "id": 101,
+      "title": "Apple Laptop Model 101",
+      "brand": "Apple",
+      "price": "1058",
+      "snippet": "This is a <b>Apple</b> Laptop with great features and performance",
+      "score": 1.4822293996810914
     }
   ],
   "page": 1,
   "limit": 10
 }
 ```
+
+#### Response Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `data` | `array` | List of matched product objects |
+| `data[].id` | `number` | Unique product ID |
+| `data[].title` | `string` | Product title |
+| `data[].brand` | `string` | Brand name |
+| `data[].price` | `string` | Product price |
+| `data[].snippet` | `string` | Highlighted excerpt with matched terms wrapped in `<b>` tags |
+| `data[].score` | `number` | Relevance score computed by PostgreSQL `ts_rank` + custom boosts |
+| `page` | `number` | Current page number |
+| `limit` | `number` | Number of results returned per page |
+
+#### Error Responses
+
+| Status | Description |
+|---|---|
+| `400 Bad Request` | Missing required parameters (`page` or `limit`) |
+| `429 Too Many Requests` | Rate limit exceeded — max 10 requests/min per IP |
+| `500 Internal Server Error` | Unexpected server error |
 
 ---
 
