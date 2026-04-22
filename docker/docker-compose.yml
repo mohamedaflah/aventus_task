@@ -6,15 +6,17 @@ services:
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: search_user
-      POSTGRES_PASSWORD: search_123
-      POSTGRES_DB: search_db
+      # Maps your .env variables to Postgres internal variables
+      POSTGRES_USER: ${DB_USER_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U search_user -d search_db"]
+      # Uses the variables to ensure the check remains valid after credential changes
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER_NAME} -d ${DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -25,7 +27,6 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    # Optional: Persist redis data if you want to keep cache after restart
     volumes:
       - redis_data:/data
 

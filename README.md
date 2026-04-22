@@ -75,7 +75,7 @@ REDIS_URL=redis://localhost:6379
 PostgreSQL and Redis are managed via Docker Compose:
 
 ```bash
-docker-compose -f ./docker/docker-compose.yml up -d
+docker-compose --env-file .env -f docker/docker-compose.yml up -d
 ```
 
 This will automatically:

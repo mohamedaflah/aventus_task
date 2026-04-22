@@ -43,11 +43,15 @@ async function createTable() {
   console.log("Table + index created");
 }
 
-
 async function run() {
-    await createTable();
-    await seedProducts();
-    process.exit();
-  }
-  
-  run();
+  await createTable();
+
+  // ✅ Clear old data
+  await pool.query("TRUNCATE TABLE products RESTART IDENTITY;");
+
+  await seedProducts();
+
+  process.exit();
+}
+
+run();

@@ -1,7 +1,6 @@
 import { type Request, Response } from "express";
 import { searchProductService } from "./service";
 import { asyncHandler } from "../../middlewares/asyncHandler";
-import { AppError } from "../../utils/AppError";
 export const searchController = asyncHandler(
   async (req: Request, res: Response) => {
     const { q, page = "1", limit = "10", sort } = req.query;
